@@ -44,7 +44,7 @@ observables for the `structured` case. Instead to run the following scripts for
 the `shuffled` case, set `--method shuffled`.
 Currently `model_name` can be set to `Llama-3-8B`, `Mistral-7B`, `Pythia-6.9B`.
 
-### Extracting the token representations and compute the corresponding distance matrices
+### a. Extracting the token representations and compute the corresponding distance matrices
 
 The following script extracts the representations for `Llama-3-8B`  model and stores 
 the distances matrices in the folder `results/Pile-Structured/Llama-3-8B`.
@@ -58,7 +58,7 @@ It takes around 40 minutes to extract the token representations and compute
 the distance matrices for `2242` prompts for each model. It is possible to have
 a more optimized configuration to run the above script.
 
-### Calculating the observables - ID, NO and cosine similarities
+### b. Calculating the observables - ID, NO and cosine similarities
 The following script reads the distance matrices among the token representations
 for each prompt and computes the observables (ID, NO and cosine similarity)
 computation the observables in the folder `results/Pile-Structured/Llama-3-8B`. 
@@ -71,7 +71,7 @@ with the NO computations taking around 20 minutes
 for `2242` prompts for each model. It is possible to have a more optimized
 configuration to run the above script.
 
-### Reproducing the plots in the paper
+### c. Reproducing the plots in the paper
 The plots in the papers are reproduced in the two notebooks in `results/plots`
 
 1. `shuffle_experiment.ipynb` - Reproduces the plots in section 4.2 of the paper
