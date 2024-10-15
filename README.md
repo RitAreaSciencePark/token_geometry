@@ -41,8 +41,8 @@ i.e. we choose `50` prompts from the `2242` prompts. The indices of these prompt
 
 Below we show the scripts to extract token represetations and compute the 
 observables for the `structured` case. Instead to run the following scripts for 
-the `shuffled` case replace `--method structured` with`--method shuffled`.
-Currently `--model_name` can be set to `Llama-3-8B`, `Mistral-7B`, `Pythia-6.9B`.
+the `shuffled` case, set `--method shuffled`.
+Currently `model_name` can be set to `Llama-3-8B`, `Mistral-7B`, `Pythia-6.9B`.
 
 ### Extracting the token representations and compute the corresponding distance matrices
 
