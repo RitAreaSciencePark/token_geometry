@@ -7,7 +7,7 @@ from tqdm import tqdm
 from joblib import Parallel, delayed
 from utils import extract_hidden_states, parse_arguments, \
     compute_cosine_similarities, compute_distances, shuffle_tokens, \
-        convert_to_numpy
+        convert_to_numpy, compute_nearest_neighbors, compute_nn_sim
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -105,12 +105,12 @@ if __name__ == "__main__":
         output_folder = f"{input_dir}/Pile-Shuffled/{model_name}"
         os.makedirs(f"{output_folder}/distances", exist_ok=True)
         os.makedirs(f"{output_folder}/cosine_similarities", exist_ok=True)
-        os.makedirs(f"{output_folder}/losses", exist_ok=True)
-        
+        os.makedirs(f"{output_folder}/summaries", exist_ok=True)
+        losses = []
+        all_nn_sims =[]
         for batch_num, test_seq in enumerate(tqdm(filtered_sequences)):
             with torch.no_grad():
                 hidden_states = []
-                losses = []
                 for idx in range(6):
                     inputs = tokenizer(test_seq.strip(), add_special_tokens = False, \
                                        return_tensors = "pt", max_length = max_length, \
@@ -123,8 +123,19 @@ if __name__ == "__main__":
                     hidden_states.append(convert_to_numpy(hidden_state))
                     losses.append(loss.to(torch.float32).cpu().detach().numpy())
             
-            distances = Parallel(n_jobs=-1)(delayed(compute_distances)(hs) for hs in hidden_states)
+            distances = Parallel(n_jobs=-1)(delayed(compute_distances)(hs) \
+                        for hs in hidden_states) # iterating through prompts
+            if args.find_nn_sim == "True":
+                nearest_nbrs = np.array(Parallel(n_jobs=-1)(delayed(compute_nearest_neighbors)(dm)\
+                                                   for dm in distances))
+                # nearest_nbrs.shape = 6 x 33 x 1024 x 2
+                nn_sim = Parallel(n_jobs=-1)(delayed(compute_nn_sim)(hs, nearest_nbr_list)\
+                            for hs, nearest_nbr_list in zip(hidden_states, nearest_nbrs))
+                all_nn_sims.append(nn_sim)
+                
             csn_sim = Parallel(n_jobs=-1)(delayed(compute_cosine_similarities)(hs) for hs in hidden_states)        
             np.save(f"{output_folder}/distances/{batch_num}.npy", distances)
             np.save(f"{output_folder}/cosine_similarities/{batch_num}.npy", csn_sim)
-            np.save(f"{output_folder}/losses/{batch_num}.npy", losses)    
+        np.save(f"{output_folder}/summaries/losses.npy", losses)
+        if args.find_nn_sim == "True": 
+            np.save(f"{output_folder}/summaries/nn_sim.npy", all_nn_sims) 

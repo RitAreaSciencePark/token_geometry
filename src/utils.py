@@ -3,6 +3,7 @@ import torch
 import argparse
 import json
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
+from scipy.spatial import distance
 
 def parse_arguments():
     parser = argparse.ArgumentParser()   
@@ -10,6 +11,7 @@ def parse_arguments():
     parser.add_argument("--model_name", type=str, default=None)
     parser.add_argument("--method", type=str, default=None)
     parser.add_argument("--login_token", type=str, default=None)
+    parser.add_argument("--find_nn_sim", type=str, default="False")
     args = parser.parse_args()
     print("input args:\n", json.dumps(vars(args), indent=4, separators=(",", ":")))
     return args
@@ -29,7 +31,22 @@ def extract_hidden_states(sequence, model, tokenizer, max_length):
           "loss": loss.to(torch.float32).cpu().detach().numpy()}
 
 def compute_distances(hs):
+    # Iterating through layers
     return  np.array([euclidean_distances(embeddings[0]) for embeddings in hs])
+
+def compute_nearest_neighbors(distances):
+    return  np.array([np.argsort(distance, axis = -1)[:, 1:3]  for distance in distances])
+
+def csn_sim(embeddings, nn_list):
+    ans = []
+    for idx, (token_rep, nn) in enumerate(zip(embeddings, nn_list)):
+        v1 = embeddings[idx] - embeddings[nn_list[idx, 0]]
+        v2 = embeddings[idx] - embeddings[nn_list[idx, 1]]
+        ans.append(1 - distance.cosine(v1, v2))
+    return np.array(ans)
+
+def compute_nn_sim(hs, nn_lists):
+    return  np.array([csn_sim(embeddings[0], nn_list)  for embeddings, nn_list in zip(hs, nn_lists)])
 
 def compute_cosine_similarities(hs):
     return  np.array([cosine_similarity(embeddings[0]) for embeddings in hs])
