@@ -1,0 +1,18 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Python
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Karthik
+    family-names: Viswanathan
+    email: k.viswanathan@uva.nl
+    affiliation: University of Amsterdam
+    orcid: 'https://orcid.org/0009-0008-4974-8083'
+  - given-names: Yuri
+    family-names: Gardinazzi
+    affiliation: 'Area Science Park, Trieste, Italy'
