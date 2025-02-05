@@ -1,7 +1,1 @@
-
 .DS_Store
-generate_summary.sh
-get_token_reps.sh
-results/plots/.ipynb_checkpoints/
-
-results/Pile-Shuffled/Llama-3-8B/summaries/transitivities.npy
