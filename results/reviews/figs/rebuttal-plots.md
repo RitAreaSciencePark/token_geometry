@@ -9,20 +9,14 @@ Here, we perform two checks
 ![shuffled_scale_analysis](shuffled_scale_analysis.png)
 
 ### Example of shuffled ID < unshuffled ID
+For the analysis here, we use LLama 3 8B. 
 
 ![shuffled_less_than_unshuffled](shuffled_less_than_unshuffled.png)
 
-#### TAKEAWAY: At layer 15, prompt 3500 has a high normal ID and prompt 7505 has a lower shuffled ID. Document 3500 is a list of names and Document 7505 carries more context, thereby providing an example where Unshuffled ID (3500) > Shuffled ID (7505)
-
-## ID estimation on random vocabulary tokens ([Jupyter Notebook](../random_vocabulary_tokens.ipynb))
-Here we compare the ID of the prompt 3218, its shuffled version and 1024 tokens randomly sampled from the vocabulary. 
-
-![vocab_comparison](vocab_comparison.png)
-#### Intrinsic dimension of the vocabulary > shuffled prompt > unshuffled prompt
-The experiments here and the previous section above suggest that intrinsic dimension can be used as a measure of context in a prompt.
-High intrinsic dimension suggests a lower level of context as seen in the vocabulary tokens, shuffled prompts, and PROMPT 3500 (which contained a list of names)
+#### TAKEAWAY: At layer 15, prompt 3500 has a high normal ID and prompt 7505 has a lower shuffled ID. Document 3500 is a list of names and Document 7505 carries more context, thereby providing an example where Unshuffled ID (3500) > Shuffled ID (7505). 
 
 ## Comparison with other estimators for PROMPT 3218 ([Jupyter Notebook](../comparison_other_estimators.ipynb))
+For the analysis here, we use LLama 3 8B. 
 
 ![id_estimators_comparison](id_estimators_comparison.png)
 We notice that TLE, ESS and GRIDE estimators have a similar ID profile across layers.
