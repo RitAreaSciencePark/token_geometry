@@ -28,14 +28,7 @@ High intrinsic dimension suggests a lower level of context as seen in the vocabu
 We notice that TLE, ESS and GRIDE estimators have a similar ID profile across layers.
 Another important factor is the computational advantage of GRIDE since the full experiment involves running across a large number (2244) of prompts.
 Here is a table with the summary of number of point clouds processed per second.
-| Estimator | Samples/sec (avg) |
-|-----------|-------------------|
-| **GRIDE** | 30.82             |
-| **MOM**   | 14.06             |
-| **MLE**   | 13.53             |
-| **CorrInt** | 6.16           |
-| **ESS**   | 2.97              |
-| **PCA**   | 1.24              |
-| **FisherS** | 1.21            |
-| **TLE**   | 1.16              |
-| **MADA**  | 0.92              |
+| Estimator | GRIDE | MOM  | MLE  | CorrInt | ESS  | PCA  | FisherS | TLE  | MADA |
+|-----------|-------|------|------|---------|------|------|---------|------|------|
+| Samples/sec (avg) | 30.82 | 14.06 | 13.53 | 6.16    | 2.97 | 1.24 | 1.21    | 1.16 | 0.92 |
+
