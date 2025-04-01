@@ -3,7 +3,7 @@
 ## Shuffling consistency check
 Here, we perform two checks
 1. Is the higher shuffled ID an artifact of noise? We perform the scale analysis for the shuffled prompts and show that they plateau around scaling = 4
-2. When would a shuffled prompt be expected to show a lower ID than the normal sentence? Check for samples where this happens
+2. When would a shuffled prompt be expected to show a lower ID than the normal sentence? We check for samples where this happens
 ### Scale analysis for shuffled prompts
 ![shuffled_scale_analysis](shuffled_scale_analysis.png)
 
