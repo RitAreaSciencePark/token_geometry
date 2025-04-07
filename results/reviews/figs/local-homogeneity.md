@@ -11,7 +11,7 @@ $\log$ $\mu$ and $-\log(1 - F^{emp}(\mu_i))$. For a more elaborate explanation, 
 The intrinsic dimension is then estimated as the slope of this line, as illustrated in Figure 1 of [1]. 
 
 We check if this distribution results in a straight line in our case by performing this check on prompt 3218 for layer 11 in 
-[this figure](https://anonymous.4open.science/r/token_geometry-D346/results/reviews/figs/local_homogenity_layer_11.png) and 
+[this figure](https://anonymous.4open.science/r/token_geometry-D346/results/reviews/figs/local_homogeneity_layer_11.png) and 
 for all layers in [this figure](https://anonymous.4open.science/r/token_geometry-D346/results/reviews/figs/local_homogeneity_all_layers.png).
 It can be seen from the above figures that this results in a distribution implying that the token representations satisfy a necessary
 condition of the local homogeneity hypothesis.
