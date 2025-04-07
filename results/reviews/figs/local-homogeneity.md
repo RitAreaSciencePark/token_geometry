@@ -7,7 +7,7 @@ context of the TwoNN estimator.
 
 In [1], where the TwoNN estimator is introduced, the authors show that local homogeneity leads to a linear relationship between quantities
 related to the log-ratios $\left(\mu = \frac{r_2}{r_1}\right)$ and the empirical cumulative distribution . In particular, the linear relationship is between
-$(log(\mu_i), -log(1 - F^{emp}(\mu_i)))$. For a more elaborate explanation, please refer to the section "A Two Nearest Neighbors estimator for intrinsic dimension" in [1].
+$log(\mu_i)$ and $-log(1 - F^{emp}(\mu_i))$. For a more elaborate explanation, please refer to the section "A Two Nearest Neighbors estimator for intrinsic dimension" in [1].
 The intrinsic dimension is then estimated as the slope of this line, as illustrated in Figure 1 of [1]. 
 
 We check if this distribution results in a straight line in our case by performing this check on prompt 3218 for layer 11 in 
