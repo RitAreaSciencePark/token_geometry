@@ -22,7 +22,7 @@ For the analysis here, we use LLama 3 8B.
 We notice that TLE, ESS and GRIDE estimators have a similar ID profile across layers.
 Another important factor is the computational advantage of GRIDE since the full experiment involves running across a large number (2244) of prompts.
 Here is a table with the summary of number of point clouds processed per second.
-| Estimator | GRIDE | MOM  | MLE  | CorrInt | ESS  | PCA  | FisherS | TLE  | MADA |
-|-----------|-------|------|------|---------|------|------|---------|------|------|
-| Samples/sec (avg) | 30.82 | 14.06 | 13.53 | 6.16    | 2.97 | 1.24 | 1.21    | 1.16 | 0.92 |
+| Estimator           | GRIDE | MOM   | MLE   | CorrInt | ESS  | TLE  |
+|---------------------|-------|-------|-------|---------|------|------|
+| Samples/sec (avg)   | 30.82 | 14.06 | 13.53 | 6.16    | 2.97 | 1.16 |
 
