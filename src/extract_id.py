@@ -27,6 +27,9 @@ def parse_arguments():
     print("input args:\n", json.dumps(vars(args), indent=4, separators=(",", ":")))
     return args
 
+def convert_to_tensor(hs):
+    return torch.stack([item for item in hs])
+
 def convert_to_distances(hs):
     return torch.stack([torch.cdist(item, item).squeeze() for item in hs])
 
@@ -40,7 +43,8 @@ def extract_hidden_states(sequence, model, tokenizer, max_length):
                       output_hidden_states=True)
       hidden_states, loss = outputs.hidden_states, outputs.loss
       ans = {
-              "hidden_distances" : convert_to_distances(hidden_states).cpu().detach().numpy(),\
+              "hidden_states": convert_to_tensor(hidden_states),
+              "hidden_distances" : convert_to_distances(hidden_states),\
               "loss": loss.to(torch.float32).cpu().detach().numpy(), \
               # "logit_distances": torch.cdist(outputs.logits, outputs.logits).cpu().detach().numpy().squeeze()
              }         
