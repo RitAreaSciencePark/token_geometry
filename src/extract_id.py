@@ -8,7 +8,9 @@ from joblib import Parallel, delayed
 from dadapy import data
 import argparse
 import json
-
+torch.set_grad_enabled(False)
+print("Disabled automatic differentiation")
+import skdim
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -50,15 +52,49 @@ def extract_hidden_states(sequence, model, tokenizer, max_length):
              }         
       return ans
 
+def get_knn_from_torch_distance_matrix(dist_matrix: torch.Tensor, k: int):
+    """
+    dist_matrix: torch.Tensor of shape (N, N) — pairwise distances
+    k: number of nearest neighbors to extract (excluding self-distance)
 
-def compute_ids(full_reps):
+    Returns:
+        knn_dists: np.ndarray of shape (N, k) with distances to k nearest neighbors
+    """
+    assert dist_matrix.shape[0] == dist_matrix.shape[1], "Distance matrix must be square"
+    
+    # Exclude the self-distance (0) by sorting and skipping the first column
+    sorted_dists, sorted_neighbors = torch.sort(dist_matrix, dim=1)
+    
+    return sorted_dists[:, 1:k+1], sorted_neighbors[:, 1:k+1]  # Only this small part is moved to CPU
+
+def compute_id_across_estimators(rep, dist_matrix, method):
+    if method == 'ESS':
+        knn_dists, knn_neighbors = get_knn_from_torch_distance_matrix(dist_matrix, k=10)
+        knn_dists, knn_neighbors = knn_dists.double().cpu().numpy(), knn_neighbors.cpu().numpy()
+        ess=skdim.id.ESS()
+        return ess.fit_transform(rep.cpu().numpy(), precomputed_knn_arrays=[knn_dists, knn_neighbors])
+        
+    elif method == 'GRIDE':
+        _data = data.Data(distances=dist_matrix.cpu().numpy(), maxk=100)
+        return _data.return_id_scaling_gride(range_max=64)[0][1]
+        
+    elif method == 'TLE':
+        knn_dists, knn_neighbors = get_knn_from_torch_distance_matrix(dist_matrix, k=20)
+        knn_dists, knn_neighbors = knn_dists.double().cpu().numpy(), knn_neighbors.cpu().numpy()
+        tle=skdim.id.TLE()
+        return tle.fit_transform(rep.cpu().numpy(), precomputed_knn_arrays=[knn_dists, knn_neighbors])
+    
+    else:
+        raise ValueError(f"Unknown method: {method}")
+    
+def compute_ids(all_layer_activations, all_layer_distances):
     ids = []
-    for full_rep in full_reps:
-        _, indices = np.unique(full_rep, axis=0, return_index=True)
-        rep = full_rep[indices, :][:, indices]
-        _data = data.Data(distances=rep, maxk=100)
-        ids.append(_data.return_id_scaling_gride(range_max=64))
-    return np.array(ids)
+    for layer_activations, layer_distances in zip(all_layer_activations, all_layer_distances):
+        ids_across_estimators = {}
+        for method in ['GRIDE', 'ESS', "TLE"]:
+            ids_across_estimators[method] = compute_id_across_estimators(layer_activations, layer_distances, method)
+        ids.append(ids_across_estimators)
+    return ids
 
 def load_model(model_name, device):
     try:
@@ -92,8 +128,8 @@ if __name__ == "__main__":
     device = torch.device('cuda')
     model, tokenizer = load_model(model_name, device = device)
     
-    ds = load_dataset("NeelNanda/pile-10k")['train']
-    sequences = ds['text']
+    ds = load_dataset("NeelNanda/pile-10k")['train'] # type: ignore
+    sequences = ds['text'] # type: ignore
     max_length = 1024
     
     output_folder = f"{args.input_dir}/Pile-{args.method.capitalize()}/{args.model_name}"
@@ -102,7 +138,7 @@ if __name__ == "__main__":
         batch_sz = 32
         filtered_indices = np.load('filtered_indices.npy')
         filtered_sequences = [sequences[idx] for idx in filtered_indices]
-        ids_output, logits_ids_output, losses = [], [], []
+        ids_output, losses = [], []
         
         for batch_start in tqdm(range(0, len(filtered_indices), batch_sz)):
             batch_sequences = filtered_sequences[batch_start: batch_start + batch_sz]
@@ -114,13 +150,9 @@ if __name__ == "__main__":
             hidden_ids = np.array(Parallel(n_jobs=-1)(delayed(compute_ids)(hs) for hs in hidden_distances))
             ids_output.extend(hidden_ids)
             losses.extend([item["loss"] for item in intermediate_reps])
-            logit_distances = np.array([item["logit_distances"] for item in intermediate_reps])
-            logit_ids = np.array(Parallel(n_jobs=-1)(delayed(compute_ids)([ld]) for ld in logit_distances))
-            logits_ids_output.extend(logit_ids)
         
         np.save(f'{output_folder}/losses.npy', losses)
         np.save(f'{output_folder}/gride.npy', np.array(ids_output))
-        np.save(f'{output_folder}/logits_id.npy', np.array(logits_ids_output).squeeze())        
     
     elif args.method == "shuffled":
         new_filtered_indices = np.load('subset_indices.npy')
