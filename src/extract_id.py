@@ -42,7 +42,7 @@ def extract_hidden_states(sequence, model, tokenizer, max_length):
       ans = {
               "hidden_distances" : convert_to_distances(hidden_states).cpu().detach().numpy(),\
               "loss": loss.to(torch.float32).cpu().detach().numpy(), \
-              "logit_distances": torch.cdist(outputs.logits, outputs.logits).cpu().detach().numpy().squeeze()
+              # "logit_distances": torch.cdist(outputs.logits, outputs.logits).cpu().detach().numpy().squeeze()
              }         
       return ans
 
