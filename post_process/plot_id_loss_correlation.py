@@ -86,7 +86,7 @@ def main():
     plt.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=3, fontsize="medium")
     plt.tight_layout()
     plt.savefig(args.out, bbox_inches="tight", dpi=150)
-    print(f"✅ Saved plot to {args.out}")
+    print(f"Saved plot to {args.out}")
 
 # Usage: python -m post_process.plot_id_loss_correlation   --root results   --model "meta-llama/Meta-Llama-3-8B"   --out results/figs/id_loss_correlation_llama_estimators.png
 if __name__ == "__main__":

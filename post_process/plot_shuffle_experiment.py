@@ -117,7 +117,7 @@ def plot_for_prompt(ids_dict, prompt_idx, num_shuffles, outpath):
     plt.tight_layout()
     os.makedirs(os.path.dirname(outpath) or ".", exist_ok=True)
     plt.savefig(outpath, bbox_inches="tight", dpi=150)
-    print(f"✅ Saved: {outpath}")
+    print(f"Saved: {outpath}")
 
 def main():
     ap = argparse.ArgumentParser()
