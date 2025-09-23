@@ -1,0 +1,7 @@
+*checkpoint*
+*.pyc
+allocate_node.sh
+.gitignore
+logs/*
+*results_*_*
+Untitled.ipynb

@@ -25,6 +25,9 @@ def parse_arguments():
     parser.add_argument("--input_dir", type=str, default=None)
     parser.add_argument("--model_name", type=str, default=None)
     parser.add_argument("--method", type=str, default=None)
+    parser.add_argument("--batch_start", type=int, required=True, help="Start index of batch")
+    parser.add_argument("--batch_end", type=int, required=True, help="End index of batch (exclusive)")
+    
     args = parser.parse_args()
     print("input args:\n", json.dumps(vars(args), indent=4, separators=(",", ":")))
     return args
@@ -75,8 +78,11 @@ def compute_id_across_estimators(rep, dist_matrix, method):
         return ess.fit_transform(rep.cpu().numpy(), precomputed_knn_arrays=[knn_dists, knn_neighbors])
         
     elif method == 'GRIDE':
-        _data = data.Data(distances=dist_matrix.cpu().numpy(), maxk=100)
-        return _data.return_id_scaling_gride(range_max=64)[0][1]
+        dist_matrix_np = dist_matrix.cpu().numpy()
+        _, indices = np.unique(dist_matrix_np, axis=0, return_index=True)
+        unique_dist_matrix = dist_matrix_np[indices, :][:, indices]
+        _data = data.Data(distances=unique_dist_matrix, maxk=100)
+        return np.array(_data.return_id_scaling_gride(range_max=64))
         
     elif method == 'TLE':
         knn_dists, knn_neighbors = get_knn_from_torch_distance_matrix(dist_matrix, k=20)
@@ -86,15 +92,33 @@ def compute_id_across_estimators(rep, dist_matrix, method):
     
     else:
         raise ValueError(f"Unknown method: {method}")
-    
+
+METHODS = ['GRIDE', 'ESS', 'TLE']
+  
 def compute_ids(all_layer_activations, all_layer_distances):
-    ids = []
+    # import ipdb; ipdb.set_trace()
+    assert all_layer_activations.shape[:-1] == all_layer_distances.shape[:-1]
+    ids_across_estimators = {}
+    
+    for method in METHODS: 
+        ids_across_estimators[method] = [] 
+    
     for layer_activations, layer_distances in zip(all_layer_activations, all_layer_distances):
-        ids_across_estimators = {}
-        for method in ['GRIDE', 'ESS', "TLE"]:
-            ids_across_estimators[method] = compute_id_across_estimators(layer_activations, layer_distances, method)
-        ids.append(ids_across_estimators)
-    return ids
+        for method in METHODS:
+            ids_across_estimators[method].append(compute_id_across_estimators(layer_activations, layer_distances, method))
+    
+    for method in METHODS:
+        ids_across_estimators[method] = np.array(ids_across_estimators[method])
+        if method == 'GRIDE':
+            assert ids_across_estimators[method].shape == (len(all_layer_activations), 3, 6), f"Shapes don't match, {ids_across_estimators[method].shape}, {(len(all_layer_activations), 3, 6)}"
+        elif method == 'TLE' or method == 'ESS':
+            expected_shape = (len(all_layer_activations),)
+            assert ids_across_estimators[method].shape == expected_shape, \
+                f"Shapes don't match, got {ids_across_estimators[method].shape}, expected {expected_shape}"
+        else:
+            raise ValueError(f"Unknown method: {method}")
+        
+    return ids_across_estimators
 
 def load_model(model_name, device):
     try:
@@ -127,7 +151,7 @@ if __name__ == "__main__":
     
     device = torch.device('cuda')
     model, tokenizer = load_model(model_name, device = device)
-    
+    model.eval()
     ds = load_dataset("NeelNanda/pile-10k")['train'] # type: ignore
     sequences = ds['text'] # type: ignore
     max_length = 1024
@@ -135,25 +159,39 @@ if __name__ == "__main__":
     output_folder = f"{args.input_dir}/Pile-{args.method.capitalize()}/{args.model_name}"
     os.makedirs(output_folder, exist_ok=True)
     if args.method == "structured":
-        batch_sz = 32
-        filtered_indices = np.load('filtered_indices.npy')
+        filtered_indices = np.load('filtered_indices.npy')[args.batch_start:args.batch_end]
         filtered_sequences = [sequences[idx] for idx in filtered_indices]
         ids_output, losses = [], []
-        
-        for batch_start in tqdm(range(0, len(filtered_indices), batch_sz)):
-            batch_sequences = filtered_sequences[batch_start: batch_start + batch_sz]
+        result = {
+                "ESS": [],
+                "TLE": [],
+                "GRIDE": [],
+                "loss": []
+            }
+        for sequence in tqdm(filtered_sequences):
             intermediate_reps = [
-                extract_hidden_states(seq, model, tokenizer, max_length=max_length)
-                for seq in batch_sequences
+                extract_hidden_states(sequence, model, tokenizer, max_length=max_length)
             ]
-            hidden_distances = np.array([item["hidden_distances"][1:] for item in intermediate_reps])
-            hidden_ids = np.array(Parallel(n_jobs=-1)(delayed(compute_ids)(hs) for hs in hidden_distances))
-            ids_output.extend(hidden_ids)
-            losses.extend([item["loss"] for item in intermediate_reps])
+            hidden_states = [item["hidden_states"][1:, 0] for item in intermediate_reps]
+            hidden_distances = [item["hidden_distances"][1:] for item in intermediate_reps]
+            # hidden_ids = np.array(Parallel(n_jobs=-1)(delayed(compute_ids)(hs) for hs in hidden_distances))
+            # hidden_ids = Parallel(n_jobs=2, verbose=1)(delayed(compute_ids)(hs, hd) for hs, hd in zip(hidden_states, hidden_distances))
+            hidden_ids = [compute_ids(hs, hd) for hs, hd in zip(hidden_states, hidden_distances)]
+            
+            assert len(hidden_ids) == 1
+            sequence_ids = hidden_ids[0]
+            for method in METHODS: result[method].append(sequence_ids[method])
+            
+            assert len(intermediate_reps) == 1
+            result["loss"].append(intermediate_reps[0]["loss"])
+            torch.cuda.empty_cache()
+            # import ipdb; ipdb.set_trace()
         
-        np.save(f'{output_folder}/losses.npy', losses)
-        np.save(f'{output_folder}/gride.npy', np.array(ids_output))
-    
+        # np.save(f'{output_folder}/losses.npy', losses)
+        # np.save(f'{output_folder}/gride.npy', np.array(ids_output))
+        output_file = f"{output_folder}/results_{args.batch_start}_{args.batch_end}.npz"
+        np.savez_compressed(output_file, **result)
+        print(f"✅ File saved to {output_file}")
     elif args.method == "shuffled":
         new_filtered_indices = np.load('subset_indices.npy')
         filtered_sequences = [sequences[idx] for idx in new_filtered_indices]
