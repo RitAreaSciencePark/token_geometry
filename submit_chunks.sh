@@ -11,8 +11,26 @@ MODEL_NAME="$1"
 METHOD="${2:-structured}"
 INPUT_DIR="${3:-results}"
 
-TOTAL=2244
-CHUNKS=20
+# TOTAL=2244 # 2244 if method = structured else 50
+# CHUNKS=20  # 20 if method = structured else 25
+
+# Choose TOTAL and CHUNKS by method
+case "$METHOD" in
+  structured)
+    TOTAL=2244
+    CHUNKS=20
+    ;;
+  shuffled)
+    TOTAL=50
+    CHUNKS=25
+    ;;
+  *)
+    echo "ERROR: Unknown method: '$METHOD'. Expected 'structured' or 'shuffled'."
+    exit 2
+    ;;
+esac
+
+
 CHUNK_SIZE=$(( TOTAL / CHUNKS ))  # 374
 REMAINDER=$(( TOTAL % CHUNKS ))   # 0 here, but we’ll still guard the last chunk
 

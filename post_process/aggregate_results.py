@@ -9,14 +9,18 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--root", required=True, help="Top-level results dir (your --input_dir)")
     p.add_argument("--model", required=True, help="Model name string (used in folder path)")
+    p.add_argument("--method", required=True, choices=["structured", "shuffled"],
+                   help="Which pipeline's outputs to aggregate")
     return p.parse_args()
 
-def find_files(folder):
+# ---------------- Structured helpers ----------------
+
+def find_structured_files(folder):
+    """Find results_<start>_<end>.npz, sorted by <start>."""
     pat = os.path.join(folder, "results_*_*.npz")
     files = glob(pat)
     if not files:
         raise FileNotFoundError(f"No chunked results found in {folder}")
-    # sort by start index
     def key(path):
         m = re.search(r"results_(\d+)_([0-9]+|end)\.npz$", os.path.basename(path))
         return int(m.group(1)) if m else 10**12
@@ -27,7 +31,7 @@ def stack_seqwise(obj_array):
 
 def aggregate(folder):
     ess_chunks, tle_chunks, gride_chunks, loss_chunks = [], [], [], []
-    for f in find_files(folder):
+    for f in find_structured_files(folder):
         data = np.load(f, allow_pickle=True)
         ess = stack_seqwise(data["ESS"])
         tle = stack_seqwise(data["TLE"])
@@ -53,10 +57,13 @@ def aggregate(folder):
     print(f"GRIDE : {GRIDE.shape}")
     print(f"loss  : {LOSS.shape}")
 
+# ---------------- Main ----------------
+# Usage: python -m post_process.aggregate_results   --root results   --model "meta-llama/Meta-Llama-3-8B"   --method shuffled
 def main():
     args = parse_args()
-    folder = os.path.join(args.root, "Pile-Structured", args.model)
-    print(f"Aggregating from {folder}")
+    subdir = "Pile-Structured" if args.method == "structured" else "Pile-Shuffled"
+    folder = os.path.join(args.root, subdir, args.model)
+    print(f"Aggregating from {folder} (method={args.method})")
     aggregate(folder)
 
 if __name__ == "__main__":

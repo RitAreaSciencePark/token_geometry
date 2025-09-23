@@ -14,11 +14,33 @@ import skdim
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+def shuffle_tokens(ids, shuffle_index):
+    """
+    For the shuffle experiment described in Algorithm 1 in the paper - 
+    'The Geometry of Tokens in Internal Representations of Large Language Models'
 
-def shuffle_tokens(ids):
-    assert ids.shape[0] == 1 and len(ids.shape) == 2, f"Expected shape (1, N), but got {ids.shape}"
-    permutation = np.random.permutation(ids.shape[1])
-    return ids[:, permutation]
+    Parameters
+    ----------
+    ids : torch.tensor with dtype integer
+        input_ids of the tokens for a single prompt that needs to be shuffled.
+        
+    shuffle_index : integer between 0 and 6 (not including 6).
+        the degree of shuffling where 0 is no shuffle and 5 is fully shuffled
+        case        
+
+    Returns
+    -------
+    new_ids : torch.tensor with dtype integer
+        the shuffled ids for the given prompt.
+
+    """
+    N, K = ids.shape[-1], 4**shuffle_index
+    block_size = N//K
+    permutation = np.random.permutation(K)
+    new_ids = ids.reshape((1, K, block_size))
+    new_ids = new_ids[0, permutation, :]
+    new_ids = new_ids.reshape(1, N)
+    return new_ids
 
 def parse_arguments():
     parser = argparse.ArgumentParser()   
@@ -192,29 +214,51 @@ if __name__ == "__main__":
         output_file = f"{output_folder}/results_{args.batch_start}_{args.batch_end}.npz"
         np.savez_compressed(output_file, **result)
         print(f"✅ File saved to {output_file}")
+        
     elif args.method == "shuffled":
-        new_filtered_indices = np.load('subset_indices.npy')
-        filtered_sequences = [sequences[idx] for idx in new_filtered_indices]
-        all_losses, all_ids = [], []
+        filtered_indices = np.load('subset_indices.npy')[args.batch_start:args.batch_end]
+        filtered_sequences = [sequences[idx] for idx in filtered_indices]
+        ids_output, losses = [], []
+        result = {
+                "ESS": [],
+                "TLE": [],
+                "GRIDE": [],
+                "loss": []
+            }
+        for sequence in filtered_sequences:
+            inputs = tokenizer(sequence.strip(), add_special_tokens = False, return_tensors = "pt", 
+                               max_length = max_length, truncation=True).to(device)
+            for shuffle_idx in tqdm(range(6)):
+                ids = inputs['input_ids'].clone()
+                new_ids = shuffle_tokens(ids, shuffle_idx).to(device)
+                inputs = {'input_ids':new_ids}
+                outputs = model(**inputs, labels = new_ids.clone(), output_hidden_states=True)
+                hidden_states, loss = outputs.hidden_states, outputs.loss
+                ans = {
+                        "hidden_states": convert_to_tensor(hidden_states),
+                        "hidden_distances" : convert_to_distances(hidden_states),\
+                        "loss": loss.to(torch.float32).cpu().detach().numpy(), \
+                        # "logit_distances": torch.cdist(outputs.logits, outputs.logits).cpu().detach().numpy().squeeze()
+                        }   
+                
+                intermediate_reps = [ans]
+                hidden_states = [item["hidden_states"][1:, 0] for item in intermediate_reps]
+                hidden_distances = [item["hidden_distances"][1:] for item in intermediate_reps]
+                # hidden_ids = np.array(Parallel(n_jobs=-1)(delayed(compute_ids)(hs) for hs in hidden_distances))
+                # hidden_ids = Parallel(n_jobs=2, verbose=1)(delayed(compute_ids)(hs, hd) for hs, hd in zip(hidden_states, hidden_distances))
+                hidden_ids = [compute_ids(hs, hd) for hs, hd in zip(hidden_states, hidden_distances)]
+                
+                assert len(hidden_ids) == 1
+                sequence_ids = hidden_ids[0]
+                for method in METHODS: result[method].append(sequence_ids[method])
+                
+                assert len(intermediate_reps) == 1
+                result["loss"].append(intermediate_reps[0]["loss"])
+                torch.cuda.empty_cache()
+            # import ipdb; ipdb.set_trace()
         
-        for test_seq in tqdm(filtered_sequences):
-            intermediate_reps, losses = [], []
-            for _ in range(20):
-                with torch.no_grad():
-                    inputs = tokenizer(test_seq.strip(), add_special_tokens=False, return_tensors="pt",
-                                       max_length=max_length, truncation=True).to(device)
-                    ids = inputs['input_ids']
-                    new_ids = shuffle_tokens(ids).to(device)
-                    inputs = {'input_ids':new_ids}
-                    outputs = model(**inputs, labels = inputs['input_ids'].clone(), output_hidden_states=True)
-                    hidden_states, loss = outputs.hidden_states, outputs.loss
-                    intermediate_reps.append(convert_to_distances(outputs.hidden_states).cpu().detach().numpy())
-                    losses.append(outputs.loss.to(torch.float32).cpu().detach().numpy())
-            
-            hidden_distances = np.array([item[1:] for item in intermediate_reps])
-            hidden_ids = np.array(Parallel(n_jobs=-1)(delayed(compute_ids)(hs) for hs in hidden_distances))
-            all_ids.extend(hidden_ids)
-            all_losses.extend(losses)
-        
-        np.save(f"{output_folder}/losses.npy", all_losses)
-        np.save(f"{output_folder}/gride.npy", all_ids)
+        # np.save(f'{output_folder}/losses.npy', losses)
+        # np.save(f'{output_folder}/gride.npy', np.array(ids_output))
+        output_file = f"{output_folder}/results_{args.batch_start}_{args.batch_end}.npz"
+        np.savez_compressed(output_file, **result)
+        print(f"✅ File saved to {output_file}")
