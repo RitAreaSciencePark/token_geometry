@@ -1,1 +1,1 @@
-# THE INTRINSIC DIMENSION OF PROMPTS IN INTERNAL REPRESENTATIONS OF LARGE LANGUAGE MODELS
+# The Intrinsic Dimension of Prompts in Internal Representations of Large Language Models
