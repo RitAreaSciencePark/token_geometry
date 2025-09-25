@@ -4,10 +4,8 @@ Source code for the paper: 'The Intrinsic Dimension of Prompts in Internal Repre
 ## Description
 
 In this project, we analyze the geometry of tokens in the hidden layers of large language models
-using intrinsic dimension (ID). We study its relation to the surprisal of next token prediction 
-and entropy of the latent predictions obtained from 
-[TunedLens](https://huggingface.co/spaces/AlignmentResearch/tuned-lens/tree/main/lens). Given a prompt,
-this is done by extracting the internal representations of the tokens -  We use the
+using intrinsic dimension (ID). Given a prompt,
+this is done by extracting the internal representations of the tokens.  We use the
 [hidden states](https://huggingface.co/docs/transformers/v4.45.2/en/internal/generation_utils#generate-outputs)
 variable from the [Transformers](https://huggingface.co/docs/transformers/index) library on Hugging Face. 
 Make sure you are logged into HuggingFace Hub and have access to the models. We calculate the intrinsic dimension
