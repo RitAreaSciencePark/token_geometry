@@ -8,8 +8,9 @@ from scipy import stats
 # Okabe–Ito colorblind-friendly palette
 CBLIND = {
     "ESS":   "#0072B2",  # blue
-    "TLE":   "#D55E00",  # vermillion
-    "GRIDE": "#009E73",  # green
+    "TLE":   "#009E73",  # vermillion
+    "GRIDE": '#FE6100'
+    
 }
 
 def pearson_per_layer(log_ids: np.ndarray, loss: np.ndarray) -> np.ndarray:
@@ -45,7 +46,7 @@ def main():
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
-    plt.figure(figsize=(8, 5))
+    # plt.figure(figsize=(8, 5))
 
     # Only show legend labels once (as requested)
     legend_labels = {
@@ -77,7 +78,7 @@ def main():
 
     # Title with model names
     model_title = {"meta-llama/Meta-Llama-3-8B": "Llama-3-8B"}
-    plt.title(f"ID–Loss Correlation per Layer — {model_title[args.model]}", fontsize="x-large")
+    # plt.title(f"ID–Loss Correlation per Layer for {model_title[args.model]}", fontsize="x-large")
 
     plt.ylabel(r"$\rho(\log ID_{\ell}, \mathrm{surprisal})$", fontsize="x-large")
     plt.xlabel("Layer", fontsize="x-large")
@@ -86,7 +87,7 @@ def main():
     plt.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=3, fontsize="medium")
     plt.tight_layout()
     plt.savefig(args.out, bbox_inches="tight", dpi=150)
-    print(f"✅ Saved plot to {args.out}")
+    print(f"Saved plot to {args.out}")
 
 # Usage: python -m post_process.plot_id_loss_correlation   --root results   --model "meta-llama/Meta-Llama-3-8B"   --out results/figs/id_loss_correlation_llama_estimators.png
 if __name__ == "__main__":
