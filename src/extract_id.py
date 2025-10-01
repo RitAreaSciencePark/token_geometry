@@ -16,9 +16,8 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def shuffle_tokens(ids, shuffle_index):
     """
-    For the shuffle experiment described in Algorithm 1 in the paper - 
-    'The Geometry of Tokens in Internal Representations of Large Language Models'
-
+    For the shuffle experiment described in the paper
+    
     Parameters
     ----------
     ids : torch.tensor with dtype integer
