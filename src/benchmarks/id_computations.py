@@ -65,7 +65,7 @@ def compute_dimension(input_data,method="GRIDE"):
             print(f"[ERROR] MLE method failed with k={k} and n_samples={n_samples}: {e}")
             return None
     elif method == "TLE":
-        # ADDED: try-except block to prevent crashes from the TLE method
+       
         try:
             # Attempt to compute the dimension using TLE
             return skdim.id.TLE().fit_transform(input_data)
@@ -105,14 +105,14 @@ def read_files_and_run_layer(input_files, output_path, output_file, layer_to_com
         print(f"[ERROR] - Invalid layer index '{layer_to_compute}'. Must be between 0 and {N_LAYERS - 1}.")
         return
 
-    # --- MODIFICATION: Create a specific directory for the layer's output ---
+    
     layer_output_path = os.path.join(output_path, f"layer_{layer_to_compute}")
     os.makedirs(layer_output_path, exist_ok=True)
     print(f"[INFO] - Output will be saved in: {layer_output_path}")
 
     print(f"[INFO] - Starting computation for layer {layer_to_compute} with method '{method}'")
 
-    # --- MODIFICATION: Initialize batch processing variables ---
+    
     batch_dimensions = []
     batch_counter = 0
     total_results_count = 0
@@ -148,7 +148,7 @@ def read_files_and_run_layer(input_files, output_path, output_file, layer_to_com
             print(f"[WARNING] - Could not process file {f}: {e}")
             continue
 
-    # --- MODIFICATION: Save any remaining results in the last batch ---
+   
     if batch_dimensions:
         batch_filename = f"{method}_{output_file}_batch_{batch_counter}.npy"
         batch_output_path = os.path.join(layer_output_path, batch_filename)
