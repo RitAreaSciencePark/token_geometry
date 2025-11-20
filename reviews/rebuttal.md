@@ -4,13 +4,13 @@
 
 To calibrate the semantic impact of our shuffling methodology, we computed BLEU and BERTScore metrics comparing shuffled prompts to their original versions. The analysis uses 50 prompts from Pile-10K with the Llama-3-8B tokenizer.
 
-Our shuffling operates at 6 degrees (0-5) where block size = 1024 / (4^degree):
-- **Degree 0**: No shuffling (block size = 1024 tokens)
-- **Degree 5**: Complete shuffling (block size = 1 token)
+Our shuffling operates at 6 degrees (0-5) where block size = 1024 / (4^index):
+- **Index 0**: No shuffling (block size = 1024 tokens)
+- **Index 5**: Complete shuffling (block size = 1 token)
 
 ## Results
 
-| Shuffle Degree | BLEU [mean (std)] | BERTScore F1 [mean (std)] |
+| Shuffle Index | BLEU [mean (std)] | BERTScore F1 [mean (std)] |
 |----------------|-------------------|---------------------------|
 | 0 (none)       | 1.00 (0.00)       | 1.00 (0.00)              |
 | 1              | 0.99 (0.00)       | 0.90 (0.05)              |
