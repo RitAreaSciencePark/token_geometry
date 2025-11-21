@@ -22,3 +22,7 @@ Our shuffling operates at 6 degrees (0-5) where block size = 1024 / (4^index):
 The results show a consistent drop in both BLEU and BERTScore across shuffle degrees. BLEU drops from 1.00 to 0.03, while BERTScore decreases from 1.00 to 0.76, quantifying the semantic disruption caused by token shuffling at each degree.
 
 ## Internal Representations
+### Gride classifier with increasing number of layers K - ATTACK dataset
+![gride](ATTACK_gride.png)
+### Entropy classifier with increasing number of layers K - ATTACK dataset 
+![gride](ATTACK_entropy.png)
