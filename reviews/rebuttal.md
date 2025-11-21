@@ -38,5 +38,11 @@ The results show a consistent drop in both BLEU and BERTScore across shuffle deg
 ### Gride classifier with increasing number of layers K - ATTACK dataset
 ![gride](ATTACK_gride.png)
 ### Entropy classifier with increasing number of layers K - ATTACK dataset 
-![gride](ATTACK_entropy.png)
+![entropy](ATTACK_entropy.png)
 
+## Cross dataset validation
+The following figures illustrate the results of a cross-dataset evaluation. Each row represents the dataset used for training, while each column corresponds to the dataset used for testing. The values displayed indicate classification accuracy. 
+We present two classifiers: one based on GRIDE and the other on entropy. Both are trained using the values of their respective measures computed up to the 15th layer of the model
+
+![gride-cross](accuracy_matrix_3x3_K15_GRIDE.png)
+![entropy-cross](accuracy_matrix_3x3_K15_ENTROPY.png)
