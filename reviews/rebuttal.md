@@ -22,17 +22,17 @@ Our shuffling operates at 6 degrees (0-5) where block size = 1024 / (4^index):
 The results show a consistent drop in both BLEU and BERTScore across shuffle degrees. BLEU drops from 1.00 to 0.03, while BERTScore decreases from 1.00 to 0.76, quantifying the semantic disruption caused by token shuffling at each degree.
 
 # Shorter prompts
-| Classifier on GRIDE | 100-200 | 200-300 | 300-400 | 400-500 |
-| :--- | :--- | :--- | :--- | :--- |
-| **malicious** | 0.79 ± 0.015 | 0.85 ± 0.0262 | 0.87 ± 0.0053 | 0.91 ± 0.102 |
-| **jailbreak** | 0.60 ± 0.0105 | 0.68 ± 0.0056 | 0.59 ± 0.0225 | 0.68 ± 0.0109 |
-| **attack** | 0.89 ± 0.0093 | 0.89 ± 0.0076 | 0.89 ± 0.0032 | 0.88 ± 0.0074 |
+| Classifier on GRIDE | 100-200 | 200-300 | 300-400 | 400-500 | 500-600 |
+| :--- | :--- | :--- | :--- | :--- |:--- |
+| **malicious** | 0.79 ± 0.015 | 0.85 ± 0.0262 | 0.87 ± 0.0053 | 0.91 ± 0.102 |0.97 ± 0.0317|
+| **jailbreak** | 0.60 ± 0.0105 | 0.68 ± 0.0056 | 0.59 ± 0.0225 | 0.68 ± 0.0109 | - |
+| **attack** | 0.89 ± 0.0093 | 0.89 ± 0.0076 | 0.89 ± 0.0032 | 0.88 ± 0.0074 |0.97 ± 0.0025|
 
-| Classifier on Entropy | 100-200 | 200-300 | 300-400 | 400-500 |
-| :--- | :--- | :--- | :--- | :--- |
-| **malicious** | 0.97 ± 0.0049 | 0.98 ± 0.003 | 0.97 ± 0.0029 | 0.97 ± 0.0037 |
-| **jailbreak** | 0.94 ± 0.0305 | 0.93 ± 0.0736 | 0.88 ± 0.1632 | 0.98 ± 0.0219 |
-| **attack** | 0.96 ± 0.0049 | 0.97 ± 0.0030 | 0.97 ± 0.0029 | 0.97 ± 0.0037 |
+| Classifier on Entropy | 100-200 | 200-300 | 300-400 | 400-500 | 500-600 |
+| :--- | :--- | :--- | :--- | :--- | :-- |
+| **malicious** | 0.97 ± 0.0049 | 0.98 ± 0.003 | 0.97 ± 0.0029 | 0.97 ± 0.0037 | 0.92 ± 0.0081 |
+| **jailbreak** | 0.94 ± 0.0305 | 0.93 ± 0.0736 | 0.88 ± 0.1632 | 0.98 ± 0.0219 | - |
+| **attack** | 0.96 ± 0.0049 | 0.97 ± 0.0030 | 0.97 ± 0.0029 | 0.97 ± 0.0037 | 0.88 ± 0.0037|
 
 # Internal Representations
 ### Gride classifier with increasing number of layers K - ATTACK dataset
