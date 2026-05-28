@@ -21,3 +21,23 @@ additional results for Table 3
 | **ATTACK** | 0.95 | 0.96 | 0.98 | 0.97 | 0.96 |
 
 
+#### Plots
+
+Intrinsic Dimension computed with GRIDE on different levels of "Nonsense" where we define as Nonsense the change of X% of words of the sentence to random words. The following plots represents also the different range scalings.
+
+##### Range scaling 2
+![range scaling 2](layers_rs2.png) 
+##### Range scaling 3
+![range scaling 3](Layers_rs3.png) 
+##### Range scaling 4
+![range scaling 4](Layers_rs4.png) 
+
+Bar plots 
+
+##### Range scaling 2
+![range scaling 2](rs_2.png) 
+##### Range scaling 3
+![range scaling 3](rs_3.png) 
+##### Range scaling 4
+![range scaling 4](rs_4.png) 
+
