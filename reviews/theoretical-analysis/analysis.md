@@ -66,7 +66,7 @@ The scale dependence can be visualized directly by Monte Carlo sampling from the
   <img src="figs/box_entropy_vs_dimension.png" alt="Monte Carlo curves of normalized entropy versus box dimension" width="520">
 </p>
 
-*Monte Carlo estimate of $\langle S\rangle/\log D$ as a function of $D=2,\ldots,40$ for fixed $L\in\{0,1,2,5,10,20\}$. For each plotted $(D,L)$ pair, the estimate uses $20{,}000$ independent samples from $\mathcal{U}[0,L]^D$. The maximum normalized standard error across all plotted pairs is $0.25\%$.*
+*Monte Carlo estimate of $\langle S\rangle/\log D$ as a function of $D=2,\ldots,40$ for fixed $L\in\{0,1,2,5,10,20\}$. For each plotted $(D,L)$ pair, the estimate uses 20,000 independent samples from $\mathcal{U}[0,L]^D$. The maximum normalized standard error across all plotted pairs is 0.25%.*
 
 For small $L$, the entropy remains close to the Dirichlet baseline, with $\langle S\rangle/\log D \sim 1$ at $L=0$ and $L=1$. 
 Beyond the Dirichlet comparison, this plot shows the role of logit scale $L$. At a fixed dimension, larger $L$ concentrates the softmax distribution and lowers entropy, i.e., $\langle S\rangle_{\mathcal{U}[0,L]^D}$ decreases with $L$ while increasing with $D$. While we can expect $\langle S\rangle$ to be positively correlated to $\log D$ at comparative ranges of $L$, we also see that this model paints a more nuanced picture than the flat Dirichlet distribution.
@@ -77,19 +77,19 @@ Here we interpret $D$ as the number of active directions in the vocabulary, not 
 
 ### Empirical check on Llama-3-8B
 
-We test this picture on Llama-3-8B ($|V| = 128{,}256$). Using the $50$ Pile prompts in `subset_indices.npy` ($1024$ tokens each), we measure how much of the full next-token distribution is accounted for by the top $D_p$ logits, i.e. by keeping only as many logits as the intrinsic dimension, where $D_p$ is the intrinsic dimension of prompt $p$, estimated by GRIDE on its per-token logit cloud. 
+We test this picture on Llama-3-8B ($|V| = 128{,}256$). Using the 50 Pile prompts in `subset_indices.npy` (1024 tokens each), we measure how much of the full next-token distribution is accounted for by the top $D_p$ logits, i.e. by keeping only as many logits as the intrinsic dimension, where $D_p$ is the intrinsic dimension of prompt $p$, estimated by GRIDE on its per-token logit cloud. 
 
 #### How many top logits are required to approximate the next token prediction?
 Keeping just the top $D_p$ logits accounts for most of the probability mass but only about half of the entropy: probability concentrates on the few competing directions, while the remaining entropy leaks into the long tail of $\sim\!10^5$ near-zero-probability tokens.
 
 | Top logits kept | Probability mass | Entropy |
 |---|---|---|
-| 1 | $58.5\%$ | $11.9\%$ |
-| 3 | $75.0\%$ | $29.7\%$ |
-| **$D_p$ (per-prompt, mean 7)** | $\mathbf{84.0\%}$ | $\mathbf{45.8\%}$ |
-| 16 | $89.4\%$ | $58.7\%$ |
-| 32 | $92.8\%$ | $68.7\%$ |
-| 128 | $96.9\%$ | $83.5\%$ |
+| 1 | 58.5% | 11.9% |
+| 3 | 75.0% | 29.7% |
+| **$D_p$ (per-prompt, mean 7)** | **84.0%** | **45.8%** |
+| 16 | 89.4% | 58.7% |
+| 32 | 92.8% | 68.7% |
+| 128 | 96.9% | 83.5% |
 
 *Fraction of the full-softmax probability mass and of the entropy captured by the top $k$ logits, considering all the tokens in the dataset. The bold row keeps each prompt's own $k=\mathrm{round}(D_p)$.*
 
@@ -102,20 +102,20 @@ To connect to the uniform box distribution $\mathcal{U}[0,L]^{D}$ of the previou
 - *Per token.* For a token at position $t$ in prompt $p$, with logits sorted descending $z_{(1)}(t) \ge z_{(2)}(t) \ge \dots$, the box length is $W_t = z_{(1)}(t) - z_{(D_p)}(t)$.
 - *Per prompt.* The box length of prompt $p$ is the average over its $N_p$ tokens, $W_p = \frac{1}{N_p}\sum_{t \in p} W_t$.
 
-Across the $50$ prompts, the mean per-token box length is about $5.13$ units, and we correlate the per-prompt box length $W_p$ with the per-prompt mean entropy $\langle S\rangle_p$.
+Across the 50 prompts, the mean per-token box length is about 5.13 units, and we correlate the per-prompt box length $W_p$ with the per-prompt mean entropy $\langle S\rangle_p$.
 
 | Box-length statistic | Value |
 |---|---|
-| mean $W_p$ | $5.13$ units |
-| $\rho(W_p,\, \langle S\rangle_p)$ | $-0.91$ (Spearman) |
+| mean $W_p$ | 5.13 units |
+| $\rho(W_p,\, \langle S\rangle_p)$ | -0.91 (Spearman) |
 
-*Logit-box length on Llama-3-8B. The mean is over the per-token values $W_t$ (aggregated across all tokens of the $50$ prompts); the correlation is computed across the $50$ per-prompt values $W_p$ against the per-prompt mean entropy $\langle S\rangle_p$.*
+*Logit-box length on Llama-3-8B. The mean is over the per-token values $W_t$ (aggregated across all tokens of the 50 prompts); the correlation is computed across the 50 per-prompt values $W_p$ against the per-prompt mean entropy $\langle S\rangle_p$.*
 
 <p align="center">
   <img src="figs/llama_box_width_scatter.png" alt="Per-prompt entropy versus logit-box length on Llama-3-8B" width="380">
 </p>
 
-*Llama-3-8B final layer, $50$ Pile prompts. Each point is one prompt: per-prompt mean entropy $\langle S\rangle_p$ versus per-prompt box length $W_p$ ($\rho = -0.91$). Prompts with a wider logit box have lower entropy, consistent with the signature of the scale parameter $L$.*
+*Llama-3-8B final layer, 50 Pile prompts. Each point is one prompt: per-prompt mean entropy $\langle S\rangle_p$ versus per-prompt box length $W_p$ ($\rho = -0.91$). Prompts with a wider logit box have lower entropy, consistent with the signature of the scale parameter $L$.*
 
 The box length and the mean entropy are strongly anti-correlated, $\rho(W_p, \langle S\rangle_p) = -0.91$ (Spearman). This is the sign predicted by the uniform box distribution, and the same relationship holds across real prompts, where those with wider logit boxes have lower entropy.
 
@@ -131,7 +131,7 @@ Putting the two measurements together, the empirical picture on Llama-3-8B suppo
   <img src="figs/llama_logit_spectrum.png" alt="Gauge-invariant logit histogram and sorted logit spectrum for a single Llama-3-8B prompt" width="820">
 </p>
 
-*Single Llama-3-8B prompt (pile index $587$, $D_p = 6$). Left: histogram of the logit gaps below the top logit, $z_{(1)} - z_i$, aggregated over the full vocabulary at six token positions, with a log count ($y$) axis. Right: the sorted logit spectrum $z_{(r)}$ against rank $r$ on a log axis, with the intrinsic dimension $D_p$ marked. The spectrum is a smooth, continuous decay; the cutoff at $r = D_p$ falls on the slope, not at an edge of a flat region.*
+*Single Llama-3-8B prompt (pile index 587, $D_p = 6$). Left: histogram of the logit gaps below the top logit, $z_{(1)} - z_i$, aggregated over the full vocabulary at six token positions, with a log count ($y$) axis. Right: the sorted logit spectrum $z_{(r)}$ against rank $r$ on a log axis, with the intrinsic dimension $D_p$ marked. The spectrum is a smooth, continuous decay; the cutoff at $r = D_p$ falls on the slope, not at an edge of a flat region.*
 
 The uniform box distribution, with $D$ active coordinates of comparable size and all remaining coordinates treated as negligible, captures the mass concentration and the scale dependence, but not the entropy held in the tail. The natural next step is to model the full shape of the logit spectrum, the density and decay of the ordered logits, and hence the tail's contribution to entropy, rather than summarizing each prompt by a single cutoff at rank $D_p$ and a single scale $L$.
 
