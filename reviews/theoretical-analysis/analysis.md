@@ -131,7 +131,7 @@ Putting the two measurements together, the empirical picture on Llama-3-8B suppo
   <img src="figs/llama_logit_spectrum.png" alt="Gauge-invariant logit histogram and sorted logit spectrum for a single Llama-3-8B prompt" width="820">
 </p>
 
-*Single Llama-3-8B prompt (pile index 587, $D_p = 6$). Left: histogram of the logit gaps below the top logit, $z_{(1)} - z_i$, aggregated over the full vocabulary at six token positions, with a log count ($y$) axis. Right: the sorted logit spectrum $z_{(r)}$ against rank $r$ on a log axis, with the intrinsic dimension $D_p$ marked. The spectrum is a smooth, continuous decay; the cutoff at $r = D_p$ falls on the slope, not at an edge of a flat region.*
+*Single Llama-3-8B prompt (pile index 587,  intrinsic dimension = 6). Left: histogram of the logit gaps below the top logit, $z_{(1)} - z_i$, aggregated over the full vocabulary at six token positions, with a log count ($y$) axis. Right: the sorted logit spectrum $z_{(r)}$ against rank $r$ on a log axis, with the intrinsic dimension $D_p$ marked. The spectrum is a smooth, continuous decay; the cutoff at $r = D_p$ falls on the slope, not at an edge of a flat region.*
 
 The uniform box distribution, with $D$ active coordinates of comparable size and all remaining coordinates treated as negligible, captures the mass concentration and the scale dependence, but not the entropy held in the tail. The natural next step is to model the full shape of the logit spectrum, the density and decay of the ordered logits, and hence the tail's contribution to entropy, rather than summarizing each prompt by a single cutoff at rank $D_p$ and a single scale $L$.
 
