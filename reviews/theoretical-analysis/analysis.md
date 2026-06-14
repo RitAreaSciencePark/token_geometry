@@ -1,4 +1,4 @@
-# Deeper analysis of the link between intrinsic dimension and entropy
+# A deeper analysis of the link between intrinsic dimension and entropy
 
 We previously interpreted the positive correlation between prompt-level intrinsic dimension and entropy using a flat Dirichlet distribution model for the next-token probability vector. This gives an analytically tractable baseline because its expected entropy can be computed explicitly and increases logarithmically with the number of effective coordinates, i.e. $\langle S \rangle_{\Delta_{\mathcal{D}_{\mathcal M}}} \sim \log \mathcal{D}_{\mathcal M} $.
 
