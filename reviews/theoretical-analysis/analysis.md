@@ -7,7 +7,7 @@ Some limitations of using the flat Dirichlet distribution are:
 - It does not account for the complexity of the logit distribution in language models like logit scale, anisotropy, or the density of points on the logit manifold.
 - The relation $\langle S \rangle_{\Delta_{\mathcal{D}_{\mathcal M}}} \sim \log \mathcal{D}_{\mathcal M}$ suggests a unit slope between expected entropy and log effective dimension. This is useful as a baseline, but it need not hold when the logits have a nontrivial scale or sampling distribution.
 
-To make this correction explicit, we analyse a simple yet tractable distribution in logit space. We consider logits sampled uniformly from a $D$-dimensional box of side length $L$, written as $\mathcal{U}[0,L]^D$. This introduces an explicit scale parameter in logit space and allows us to study how the entropy changes as the box size $L$ varies.
+To make this correction explicit, we analyse a simple yet tractable distribution in logit space. We consider logits sampled uniformly from a box of dimension $D$ and side length $L$, written as $\mathcal{U}[0,L]^D$. This introduces an explicit scale parameter in logit space and allows us to study how the entropy changes as the box size $L$ varies.
 
 This model refines the flat Dirichlet distribution baseline by moving the analysis to logit space. It shows that even at fixed effective dimension, changing the scale $L$ of the logit box can reduce the normalized entropy.
 
@@ -25,9 +25,9 @@ $$
 \lim _{{\mathcal{D}_{\mathcal M}} \rightarrow \infty} \langle S\rangle_{\Delta_{\mathcal{D}_{\mathcal M}}} = \log \mathcal{D}_{\mathcal M} + \gamma - 1 \sim \log \mathcal{D}_{\mathcal M} - 0.42
 $$
 
-This gives the logarithmic dependence on effective dimension used in the flat Dirichlet distribution baseline. We now move to a logit-space model and study the case where logits are sampled from a $D$-dimensional box of side length $L$.
+This gives the logarithmic dependence on effective dimension used in the flat Dirichlet distribution baseline. We now move to a logit-space model and study the case where logits are sampled from a box of dimension $D$ and side length $L$.
 
-## Entropy for logits sampled from a $D$-dimensional box
+## Entropy for logits sampled from a box of dimension $D$
 
 As a tractable logit-space model, assume that the logits are uniformly distributed in a box of side length $L$. More concretely, each coordinate is distributed as
 
@@ -80,24 +80,24 @@ Here we interpret $D$ as the number of active directions in the vocabulary, not 
 We test this picture on Llama-3-8B ($|V| = 128{,}256$). Using the $50$ Pile prompts in `subset_indices.npy` ($1024$ tokens each), we measure how much of the full next-token distribution is accounted for by the top $D_p$ logits, i.e. by keeping only as many logits as the intrinsic dimension, where $D_p$ is the intrinsic dimension of prompt $p$, estimated by GRIDE on its per-token logit cloud. 
 
 #### How many top logits are required to approximate the next token prediction?
-Keeping just the top-$D_p$ logits accounts for most of the probability mass but only about half of the entropy: probability concentrates on the few competing directions, while the remaining entropy leaks into the long tail of $\sim\!10^5$ near-zero-probability tokens.
+Keeping just the top $D_p$ logits accounts for most of the probability mass but only about half of the entropy: probability concentrates on the few competing directions, while the remaining entropy leaks into the long tail of $\sim\!10^5$ near-zero-probability tokens.
 
-| Logits kept | Probability mass | Entropy |
+| Top logits kept | Probability mass | Entropy |
 |---|---|---|
-| top-$1$ | $58.5\%$ | $11.9\%$ |
-| top-$3$ | $75.0\%$ | $29.7\%$ |
-| **top-$D_p$ (per-prompt, mean $7$)** | $\mathbf{84.0\%}$ | $\mathbf{45.8\%}$ |
-| top-$16$ | $89.4\%$ | $58.7\%$ |
-| top-$32$ | $92.8\%$ | $68.7\%$ |
-| top-$128$ | $96.9\%$ | $83.5\%$ |
+| 1 | $58.5\%$ | $11.9\%$ |
+| 3 | $75.0\%$ | $29.7\%$ |
+| **$D_p$ (per-prompt, mean 7)** | $\mathbf{84.0\%}$ | $\mathbf{45.8\%}$ |
+| 16 | $89.4\%$ | $58.7\%$ |
+| 32 | $92.8\%$ | $68.7\%$ |
+| 128 | $96.9\%$ | $83.5\%$ |
 
-*Fraction of the full-softmax probability mass and of the entropy captured by the top-$k$ logits, considering all the tokens in the dataset. The bold row keeps each prompt's own $k=\mathrm{round}(D_p)$.*
+*Fraction of the full-softmax probability mass and of the entropy captured by the top $k$ logits, considering all the tokens in the dataset. The bold row keeps each prompt's own $k=\mathrm{round}(D_p)$.*
 
-The concentration of probability mass on the top-$D_p$ logits supports approximating the logit vector by $D_p$ active competing coordinates, as in the $\mathcal{U}[0,L]^{D}$ box. The entropy, however, is not fully captured by these $D_p$ coordinates: about half of it lives in the long tail, which a box with only $D_p$ active coordinates does not represent. We return to this point in the [limitations](#limitations-and-future-work).
+The concentration of probability mass on the top $D_p$ logits supports approximating the logit vector by $D_p$ active competing coordinates, as in the $\mathcal{U}[0,L]^{D}$ box. The entropy, however, is not fully captured by these $D_p$ coordinates: about half of it lives in the long tail, which a box with only $D_p$ active coordinates does not represent. We return to this point in the [limitations](#limitations-and-future-work).
 
 #### Understanding the effect of the box length of prompts 
 
-To connect to the uniform box distribution $\mathcal{U}[0,L]^{D}$ of the previous section, we read off both of its parameters from these top logits: the box dimension is $D_p$ itself, and the box length is the span between the largest and the $D_p$-th largest logit, the empirical analogue of the side length $L$ of the $\mathcal{U}[0,L]^{D}$ box. We define it at two levels:
+To connect to the uniform box distribution $\mathcal{U}[0,L]^{D}$ of the previous section, we read off both of its parameters from these top logits: the box dimension is $D_p$ itself, and the box length is the gap between the largest logit and the logit at rank $D_p$, the empirical analogue of the side length $L$ of the $\mathcal{U}[0,L]^{D}$ box. We define it at two levels:
 
 - *Per token.* For a token at position $t$ in prompt $p$, with logits sorted descending $z_{(1)}(t) \ge z_{(2)}(t) \ge \dots$, the box length is $W_t = z_{(1)}(t) - z_{(D_p)}(t)$.
 - *Per prompt.* The box length of prompt $p$ is the average over its $N_p$ tokens, $W_p = \frac{1}{N_p}\sum_{t \in p} W_t$.
@@ -125,7 +125,7 @@ All figures and numbers in this section are produced by [scripts/analyze_logit_s
 
 Putting the two measurements together, the empirical picture on Llama-3-8B supports the reading of the uniform box distribution, while also showing where the model is only an approximation, albeit an improvement over the flat Dirichlet model.
 
-**The logit spectrum is not "top-$D_p$ active plus an inactive remainder."** While most of the mass sits in the top few logits, only about half of the entropy does; the rest is spread over the long tail. The figure below makes the shape explicit: the ordered logit spectrum decays smoothly, close to log-linear in rank over several decades, with $D_p$ sitting on a continuous slope rather than at a cliff. The histogram of $z_{(1)} - z_i$ is a single broad band rather than a clean active/inactive split.
+**The logit spectrum is not "top $D_p$ active plus an inactive remainder."** While most of the mass sits in the top few logits, only about half of the entropy does; the rest is spread over the long tail. The figure below makes the shape explicit: the ordered logit spectrum decays smoothly, close to log-linear in rank over several decades, with $D_p$ sitting on a continuous slope rather than at a cliff. The histogram of $z_{(1)} - z_i$ is a single broad band rather than a clean active/inactive split.
 
 <p align="center">
   <img src="figs/llama_logit_spectrum.png" alt="Gauge-invariant logit histogram and sorted logit spectrum for a single Llama-3-8B prompt" width="820">
