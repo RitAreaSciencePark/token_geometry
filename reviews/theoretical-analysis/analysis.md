@@ -97,7 +97,7 @@ The concentration of probability mass on the top $D_p$ logits supports approxima
 
 #### Understanding the effect of the box length of prompts 
 
-To connect to the uniform box distribution $\mathcal{U}[0,L]^{D}$ of the previous section, we read off both of its parameters from these top logits: the box dimension is $D_p$ itself, and the box length is the gap between the largest logit and the logit at rank $D_p$, the empirical analogue of the side length $L$ of the $\mathcal{U}[0,L]^{D}$ box. We define it at two levels:
+To connect to the uniform box distribution $\mathcal{U}[0,L]^{D}$ of the previous section, we read off empirical analogues of its two parameters from these top logits. The box dimension is $D_p$ itself. For the logit scale, we use the gap between the largest logit and the logit at rank $D_p$ as an order-statistic proxy for the side length $L$ of the $\mathcal{U}[0,L]^{D}$ box. This is not meant to assert that the top logits are iid uniform samples; it is a heuristic of how spread out the active logits are. We define it at two levels:
 
 - *Per token.* For a token at position $t$ in prompt $p$, with logits sorted descending $z_{(1)}(t) \ge z_{(2)}(t) \ge \dots$, the box length is $W_t = z_{(1)}(t) - z_{(D_p)}(t)$.
 - *Per prompt.* The box length of prompt $p$ is the average over its $N_p$ tokens, $W_p = \frac{1}{N_p}\sum_{t \in p} W_t$.
@@ -117,7 +117,7 @@ Across the 50 prompts, the mean per-token box length is about 5.13 units, and we
 
 *Llama-3-8B final layer, 50 Pile prompts. Each point is one prompt: per-prompt mean entropy $\langle S\rangle_p$ versus per-prompt box length $W_p$ ($\rho = -0.91$). Prompts with a wider logit box have lower entropy, consistent with the signature of the scale parameter $L$.*
 
-The box length and the mean entropy are strongly anti-correlated, $\rho(W_p, \langle S\rangle_p) = -0.91$ (Spearman). This is the sign predicted by the uniform box distribution, and the same relationship holds across real prompts, where those with wider logit boxes have lower entropy.
+The box-length proxy and the mean entropy are strongly anti-correlated, $\rho(W_p, \langle S\rangle_p) = -0.91$ (Spearman). This is the sign predicted by the uniform box distribution, and the same relationship holds across real prompts, where those with more spread-out active logits have lower entropy.
 
 All figures and numbers in this section are produced by [scripts/analyze_logit_spectrum_llama.py](reviews/theoretical-analysis/scripts/analyze_logit_spectrum_llama.py) (one forward pass per prompt; numbers in `outputs/summary.json`).
 
@@ -134,5 +134,4 @@ Putting the two measurements together, the empirical picture on Llama-3-8B suppo
 *Single Llama-3-8B prompt (pile index 587,  intrinsic dimension = 6). Left: histogram of the logit gaps below the top logit, $z_{(1)} - z_i$, aggregated over the full vocabulary at six token positions, with a log count on y-axis. Right: the sorted logit spectrum $z_{(r)}$ against rank $r$ on a log axis, with the intrinsic dimension $D_p$ marked. The spectrum is a smooth, continuous decay; the cutoff at $r = D_p$ falls on the slope, not at an edge of a flat region.*
 
 The uniform box distribution, with $D$ active coordinates of comparable size and all remaining coordinates treated as negligible, captures the mass concentration and the scale dependence, but not the entropy held in the tail. The natural next step is to model the full shape of the logit spectrum, the density and decay of the ordered logits, and hence the tail's contribution to entropy, rather than summarizing each prompt by a single cutoff at rank $D_p$ and a single scale $L$.
-
 
